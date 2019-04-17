@@ -12,7 +12,7 @@ namespace CadeMeuMedico.Migrations
                 c => new
                     {
                         CidadeID = c.Int(nullable: false, identity: true),
-                        Nome = c.String(),
+                        Nome = c.String(nullable: false),
                     })
                 .PrimaryKey(t => t.CidadeID);
             
@@ -22,8 +22,8 @@ namespace CadeMeuMedico.Migrations
                     {
                         MedicoID = c.Int(nullable: false),
                         DataAdd = c.String(nullable: false, maxLength: 128),
-                        Nome = c.String(),
-                        CRM = c.String(),
+                        Nome = c.String(nullable: false),
+                        CRM = c.String(nullable: false),
                         Endereco = c.String(),
                         Telefone = c.String(),
                         DataAtual = c.String(),
@@ -41,7 +41,7 @@ namespace CadeMeuMedico.Migrations
                 c => new
                     {
                         EspecialidadeID = c.Int(nullable: false, identity: true),
-                        Nome = c.String(),
+                        Nome = c.String(nullable: false),
                     })
                 .PrimaryKey(t => t.EspecialidadeID);
             
@@ -50,9 +50,9 @@ namespace CadeMeuMedico.Migrations
                 c => new
                     {
                         UsuarioID = c.Int(nullable: false, identity: true),
-                        Nome = c.String(),
-                        Email = c.String(),
-                        Senha = c.String(),
+                        Nome = c.String(nullable: false, maxLength: 30),
+                        Email = c.String(nullable: false, maxLength: 30),
+                        Senha = c.String(nullable: false),
                     })
                 .PrimaryKey(t => t.UsuarioID);
             

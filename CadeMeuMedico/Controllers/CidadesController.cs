@@ -19,15 +19,21 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // GET: Cidades/Create
+        [Authorize]
         public ActionResult Create() {
             return View();
         }
 
         // POST: Cidades/Create
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "CidadeID,Nome")] Cidade cidade) {
             if (ModelState.IsValid) {
+                if (db.Cidades.Count(c => c.Nome == cidade.Nome) > 0) {
+                    ModelState.AddModelError("Nome", "Essa cidade já esta cadastrada");
+                    return View(cidade);
+                }
                 db.Cidades.Add(cidade);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -37,6 +43,7 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // GET: Cidades/Edit/5
+        [Authorize]
         public ActionResult Edit(int? id) {
             if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -49,10 +56,15 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // POST: Cidades/Edit/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "CidadeID,Nome")] Cidade cidade) {
             if (ModelState.IsValid) {
+                if (db.Cidades.Count(c => c.Nome == cidade.Nome) > 0) {
+                    ModelState.AddModelError("Nome", "Essa cidade já esta cadastrada");
+                    return View(cidade);
+                }
                 db.Entry(cidade).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -73,6 +85,7 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // POST: Cidades/Delete/5
+        [Authorize]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id) {
@@ -80,13 +93,6 @@ namespace CadeMeuMedico.Controllers {
             db.Cidades.Remove(cidade);
             db.SaveChanges();
             return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing) {
-            if (disposing) {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }

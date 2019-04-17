@@ -19,15 +19,21 @@ namespace CadeMeuMedico.Controllers {
         }
 
        // GET: Especialidades/Create
+        [Authorize]
         public ActionResult Create() {
             return View();
         }
 
         // POST: Especialidades/Create
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "EspecialidadeID,Nome")] Especialidade especialidade) {
             if (ModelState.IsValid) {
+                if (db.Especialidades.Count(e => e.Nome == especialidade.Nome) > 0) {
+                    ModelState.AddModelError("Nome", "Essa especialidade já esta cadastrada");
+                    return View(especialidade);
+                }
                 db.Especialidades.Add(especialidade);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -37,6 +43,7 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // GET: Especialidades/Edit/5
+        [Authorize]
         public ActionResult Edit(int? id) {
             if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -49,10 +56,15 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // POST: Especialidades/Edit/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "EspecialidadeID,Nome")] Especialidade especialidade) {
             if (ModelState.IsValid) {
+                if (db.Especialidades.Count(e => e.Nome == especialidade.Nome) > 0) {
+                    ModelState.AddModelError("Nome", "Essa especialidade já esta cadastrada");
+                    return View(especialidade);
+                }
                 db.Entry(especialidade).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -61,6 +73,7 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // GET: Especialidades/Delete/5
+        [Authorize]
         public ActionResult Delete(int? id) {
             if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -73,6 +86,7 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // POST: Especialidades/Delete/5
+        [Authorize]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id) {
@@ -80,13 +94,6 @@ namespace CadeMeuMedico.Controllers {
             db.Especialidades.Remove(especialidade);
             db.SaveChanges();
             return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing) {
-            if (disposing) {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }

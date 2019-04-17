@@ -13,7 +13,7 @@ namespace CadeMeuMedico.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201904101737096_Initial"; }
+            get { return "201904171930490_Initial"; }
         }
         
         string IMigrationMetadata.Source

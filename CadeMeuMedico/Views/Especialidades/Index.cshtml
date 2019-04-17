@@ -7,8 +7,10 @@
 <h2>Especialidade</h2>
 
 <p>
-    @Html.ActionLink("Adicionar Especialidade", "Create")
-</p>
+    @if (User.Identity.IsAuthenticated) {
+        @Html.ActionLink("Adicionar Especialidade", "Create")
+    }
+    </p>
 <table class="table">
     <tr>
         <th>
@@ -22,11 +24,13 @@
         <td>
             @Html.DisplayFor(modelItem => item.Nome)
         </td>
-        <td>
-            @Html.ActionLink("Editar", "Edit", new { id=item.EspecialidadeID }) |
-            @Html.ActionLink("Deletar", "Delete", new { id=item.EspecialidadeID })
-        </td>
-    </tr>
+        @if (User.Identity.IsAuthenticated) {
+            <td>
+                @Html.ActionLink("Editar", "Edit", new { id = item.EspecialidadeID }) |
+                @Html.ActionLink("Deletar", "Delete", new { id = item.EspecialidadeID })
+            </td>
+        }
+        </tr>
 }
 
 </table>

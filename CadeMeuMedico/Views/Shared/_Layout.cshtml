@@ -26,7 +26,25 @@
                     <li>@Html.ActionLink("Médico", "Index", "Medicos")</li>
                     <li>@Html.ActionLink("Cidade", "Index", "Cidades")</li>
                     <li>@Html.ActionLink("Especialidade", "Index", "Especialidades")</li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
                     <li><a>@DateTimeOffset.Now.DateTime</a></li>
+
+                    @if (User.Identity.IsAuthenticated) {
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                @User.Identity.Name<span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("Alterar Senha", "AlterarSenha", "Perfil")</li>
+                                <li>@Html.ActionLink("Sair", "Logout", "Usuarios")</li>
+                            </ul>
+                        </li>
+                    }
+                    else {
+                        <li>@Html.ActionLink("Cadastre-se", "Create", "Usuarios")</li>
+                        <li>@Html.ActionLink("Login", "Login", "Usuarios")</li>
+                    }
                 </ul>
             </div>
         </div>

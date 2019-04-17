@@ -22,6 +22,7 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // GET: Medicos/Create
+        [Authorize]
         public ActionResult Create() {
             ViewBag.CidadeID = new SelectList(db.Cidades, "CidadeID", "Nome");
             ViewBag.EspecialidadeID = new SelectList(db.Especialidades, "EspecialidadeID", "Nome");
@@ -29,21 +30,19 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // POST: Medicos/Create
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "DataAdd,Nome,CRM,Endereco,Telefone,CidadeID,EspecialidadeID")] Medico medico) {
             if (ModelState.IsValid) {
-                SqlConnection cnc = new SqlConnection(ConfigurationManager.ConnectionStrings["EFConnectionString"].ConnectionString);
-                SqlCommand cmd = new SqlCommand("SELECT MAX (MedicoID) FROM Medico", cnc);
-                cmd.Connection.Open();
-                if (cmd.ExecuteScalar() == DBNull.Value) {
-                    cmd = new SqlCommand("INSERT INTO Medico(MedicoID,DataAdd,DataAtual,Nome,CRM,Endereco,Telefone,CidadeID,EspecialidadeID) " +
-                        "VALUES (" + 1 + ", '" + medico.DataAdd + "', '" + medico.DataAtual + "', '" + medico.Nome + "', '" + medico.CRM + "', '" + medico.Endereco + "', '" + 
-                        medico.Telefone + "', " + medico.CidadeID + ", " + medico.EspecialidadeID + ")", cnc);
-                    cnc.Close();
+                int i = db.Medicos.Select(m => m.MedicoID).DefaultIfEmpty(-1).Max();
+
+                if (i == 0) {
+                    medico.MedicoID = 1;
+                    db.Medicos.Add(medico);
+                    db.SaveChanges();
                 }
                 else {
-                    int i = (int)(cmd.ExecuteScalar()); 
                     medico.MedicoID = i + 1;
                     db.Medicos.Add(medico);
                     db.SaveChanges();
@@ -57,6 +56,7 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // GET: Medicos/Edit/5
+        [Authorize]
         public ActionResult Edit(int? id, string data) {
             if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -71,6 +71,7 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // POST: Medicos/Edit/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "MedicoID,DataAdd,Nome,CRM,Endereco,Telefone,DataAtual,CidadeID,EspecialidadeID")] Medico medico) {
@@ -91,6 +92,7 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // GET: Medicos/Delete/5
+        [Authorize]
         public ActionResult Delete(int? id, string data) {
             if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -103,6 +105,7 @@ namespace CadeMeuMedico.Controllers {
         }
 
         // POST: Medicos/Delete/5
+        [Authorize]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id, string data) {
@@ -110,13 +113,6 @@ namespace CadeMeuMedico.Controllers {
             db.Medicos.Remove(medico);
             db.SaveChanges();
             return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing) {
-            if (disposing) {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }

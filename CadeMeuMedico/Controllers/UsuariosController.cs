@@ -4,19 +4,17 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Web;
 using System.Web.Mvc;
 using CadeMeuMedico.DAO;
 using CadeMeuMedico.Models;
+using CadeMeuMedico.Utils;
+using CadeMeuMedico.ViewModels;
 
 namespace CadeMeuMedico.Controllers {
     public class UsuariosController : Controller {
         private EFContext db = new EFContext();
-
-        // GET: Usuarios
-        public ActionResult Index() {
-            return View(db.Usuarios.ToList());
-        }
 
         // GET: Usuarios/Create
         public ActionResult Create() {
@@ -26,66 +24,70 @@ namespace CadeMeuMedico.Controllers {
         // POST: Usuarios/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "UsuarioID,Nome,Email,Senha")] Usuario usuario) {
-            if (ModelState.IsValid) {
-                db.Usuarios.Add(usuario);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
-            return View(usuario);
-        }
+        public ActionResult Create(CadastroUsuarioViewModel usuario) {
 
-        // GET: Usuarios/Edit/5
-        public ActionResult Edit(int? id) {
-            if (id == null) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            if (!ModelState.IsValid) {
+                return View(usuario);
             }
-            Usuario usuario = db.Usuarios.Find(id);
-            if (usuario == null) {
-                return HttpNotFound();
-            }
-            return View(usuario);
-        }
 
-        // POST: Usuarios/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "UsuarioID,Nome,Email,Senha")] Usuario usuario) {
-            if (ModelState.IsValid) {
-                db.Entry(usuario).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+            if (db.Usuarios.Count(u => u.Email == usuario.Email) > 0) {
+                ModelState.AddModelError("Email", "Esse Email já está em uso");
+                return View(usuario);
             }
-            return View(usuario);
-        }
 
-        // GET: Usuarios/Delete/5
-        public ActionResult Delete(int? id) {
-            if (id == null) {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Usuario usuario = db.Usuarios.Find(id);
-            if (usuario == null) {
-                return HttpNotFound();
-            }
-            return View(usuario);
-        }
+            Usuario user = new Usuario {
+                Nome = usuario.Nome,
+                Email = usuario.Email,
+                Senha = Hash.GerarHash(usuario.Senha)
+            };
 
-        // POST: Usuarios/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id) {
-            Usuario usuario = db.Usuarios.Find(id);
-            db.Usuarios.Remove(usuario);
+            db.Usuarios.Add(user);
             db.SaveChanges();
-            return RedirectToAction("Index");
+            TempData["Mensagem"] = usuario.Nome + " cadastrado com sucesso";
+            return View();
         }
 
-        protected override void Dispose(bool disposing) {
-            if (disposing) {
-                db.Dispose();
+        // GET: Usuarios/Login
+        public ActionResult Login(string ReturnUrl) {
+            var viewModel = new LoginViewModel {
+                UrlRetorno = ReturnUrl
+            };
+            return View(viewModel);
+        }
+
+        // POST: Usuario/Login
+        [HttpPost]
+        public ActionResult Login(LoginViewModel loginViewModel) {
+            if (!ModelState.IsValid) {
+                return View(loginViewModel);
             }
-            base.Dispose(disposing);
+            var usuario = db.Usuarios.FirstOrDefault(u => u.Email == loginViewModel.Email);
+
+            if (usuario == null) {
+                ModelState.AddModelError("Senha", "O Login ou a senha está errada");
+                return View(loginViewModel);
+            }
+
+            if (usuario.Senha != Hash.GerarHash(loginViewModel.Senha)) {
+                ModelState.AddModelError("Senha", "O Login ou a senha está errada");
+                return View(loginViewModel);
+            }
+
+            var identity = new ClaimsIdentity(new[]{
+                new Claim(ClaimTypes.Name, usuario.Nome),
+                new Claim("Email", usuario.Email)
+            }, "ApplicationCookie");
+
+            Request.GetOwinContext().Authentication.SignIn(identity);
+            if (!string.IsNullOrWhiteSpace(loginViewModel.UrlRetorno) || Url.IsLocalUrl(loginViewModel.UrlRetorno))
+                return Redirect(loginViewModel.UrlRetorno);
+            else return RedirectToAction("Index", "Medicos");
+        }
+
+        //GET : Usuarios/Logout
+        public ActionResult Logout() {
+            Request.GetOwinContext().Authentication.SignOut("ApplicationCookie");
+            return RedirectToAction("Index", "Home");
         }
     }
 }

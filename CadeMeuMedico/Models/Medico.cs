@@ -8,7 +8,9 @@ using System.Web;
 namespace CadeMeuMedico.Models {
     public class Medico :ICloneable {
         public int MedicoID { get; set; }
+        [Required]
         public string Nome { get; set; }
+        [Required]
         public string CRM { get; set; }
         public string Endereco { get; set; }
         public string Telefone { get; set; }
