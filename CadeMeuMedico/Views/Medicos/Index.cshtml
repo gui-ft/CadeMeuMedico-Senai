@@ -4,7 +4,7 @@
     ViewBag.Title = "Médico";
 }
 
-<h2>Médico</h2>
+<h2>Médicos</h2>
 
 <p>
     @if (User.Identity.IsAuthenticated) {
@@ -33,7 +33,6 @@
         </th>
         <th></th>
     </tr>
-
 @foreach (var item in Model) {
     <tr>
         <td>
@@ -56,12 +55,10 @@
         </td>
         @if (User.Identity.IsAuthenticated) {
             <td>
-    
-                @Html.ActionLink("Editar", "Edit", new { id = item.MedicoID, data = item.DataAdd }) |
-                @Html.ActionLink("Deletar", "Delete", new { id = item.MedicoID, data = item.DataAdd })
+                @Html.ActionLink("Editar", "Edit", new { id = item.MedicoID, data = item.DataAdd }, new { @class = "btn btn-default" }) |
+                @Html.ActionLink("Deletar", "Delete", new { id = item.MedicoID, data = item.DataAdd }, new { @class = "btn btn-danger" })
             </td>
-        }
+         }
     </tr>
 }
-
 </table>

@@ -60,9 +60,9 @@
     @using (Html.BeginForm()) {
         @Html.AntiForgeryToken()
 
-        <div class="form-actions no-color">
-            <input type="submit" value="Deletar" class="btn btn-default" /> |
-            @Html.ActionLink("Cancelar", "Index")
-        </div>
+    <div class="form-actions no-color">
+        <input type="submit" value="Deletar" class="btn btn-danger" /> |
+        <input type='button' value='Cancelar' class="btn btn-default" onclick='history.go(-1)' />
+    </div>
     }
 </div>
